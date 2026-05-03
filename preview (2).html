@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Love Predictor 💖</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Card */
+.container {
+  width: 90%;
+  max-width: 400px;
+  background: rgba(255,255,255,0.95);
+  padding: 25px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Progress */
+.progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 6px;
+  width: 0%;
+  background: #ff3e6c;
+  transition: 0.4s;
+}
+
+/* Animations */
+.fade {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.show {
+  opacity: 1;
+  transform: translateY(0);
+  transition: 0.4s ease;
+}
+
+/* Buttons */
+button {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 12px;
+  background: #ff6f91;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover {
+  background: #ff3e6c;
+  transform: scale(1.05);
+}
+
+/* Inputs */
+input {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="progress" id="progress"></div>
+  <div id="app"></div>
+</div>
+
+<!-- Sound -->
+<audio id="click" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3"></audio>
+
+<script>
+const app = document.getElementById("app");
+const progress = document.getElementById("progress");
+const click = document.getElementById("click");
+
+let data = {};
+let step = 1;
+const totalSteps = 7;
+
+// Sound
+function play() {
+  click.currentTime = 0;
+  click.play().catch(()=>{});
+}
+
+// Progress
+function updateProgress() {
+  progress.style.width = ((step-1)/totalSteps*100) + "%";
+}
+
+// Render with animation
+function render(html) {
+  app.classList.remove("show");
+  app.classList.add("fade");
+
+  setTimeout(()=>{
+    app.innerHTML = html;
+    app.classList.remove("fade");
+    app.classList.add("show");
+    updateProgress();
+  },200);
+}
+
+// Steps
+function showStep() {
+
+  if(step===1){
+    render(`
+      <h2>Your Name 💖</h2>
+      <input id="name" placeholder="Enter name">
+      <input id="age" type="number" placeholder="Age">
+      <button onclick="next1()">Next</button>
+    `);
+  }
+
+  else if(step===2){
+    buttons("Past Relationship?", "past", ["Never","Short","Long"]);
+  }
+
+  else if(step===3){
+    buttons("Comfort talking?", "comfort", ["Shy","Okay","Confident"]);
+  }
+
+  else if(step===4){
+    buttons("Hobbies?", "hobbies", ["Sports","Music","Gaming"]);
+  }
+
+  else if(step===5){
+    buttons("Interests?", "interests", ["Travel","Money","Peace"]);
+  }
+
+  else if(step===6){
+    buttons("Future goal?", "future", ["Rich","Happy","Famous"]);
+  }
+
+  else if(step===7){
+    generate();
+  }
+
+  else if(step===8){
+    render(`
+      <h2>Thank You 💖</h2>
+      <p>Crafted by Rishikesh</p>
+    `);
+  }
+}
+
+// Button generator
+function buttons(q,key,opts){
+  let b = opts.map(o=>`<button onclick="choose('${key}','${o}')">${o}</button>`).join("");
+  render(`<h2>${q}</h2>${b}`);
+}
+
+// Input step
+function next1(){
+  play();
+
+  let n = document.getElementById("name").value.trim();
+  let a = document.getElementById("age").value.trim();
+
+  if(!n || !a){
+    alert("Please enter name & age 😅");
+    return;
+  }
+
+  data.name = n;
+  data.age = a;
+  step++;
+  showStep();
+}
+
+// Option select
+function choose(k,v){
+  play();
+  data[k] = v;
+  step++;
+  showStep();
+}
+
+// Result generator
+function generate(){
+  render("<h2>Calculating your love score... 💘</h2>");
+
+  setTimeout(()=>{
+
+    let score = 50;
+
+    if(data.past==="Never") score+=10;
+    if(data.past==="Long") score-=5;
+
+    if(data.comfort==="Confident") score+=15;
+    if(data.comfort==="Shy") score-=5;
+
+    if(data.hobbies==="Music") score+=10;
+
+    if(data.interests==="Peace") score+=10;
+    if(data.interests==="Money") score-=5;
+
+    if(data.future==="Happy") score+=10;
+    if(data.future==="Rich") score-=3;
+
+    score = Math.max(0, Math.min(100, score));
+
+    let msg="";
+    if(score>80) msg="🔥 You're a love magnet!";
+    else if(score>60) msg="💖 Love is coming soon!";
+    else if(score>40) msg="🙂 Interesting love journey ahead!";
+    else msg="😅 Takes time, but worth it!";
+
+    render(`
+      <h2>Your Love Score 💕</h2>
+      <h1 style="color:#ff3e6c;">${score}%</h1>
+
+      <div style="width:100%;height:15px;background:#eee;border-radius:10px;overflow:hidden;">
+        <div style="width:${score}%;height:100%;background:#ff6f91;"></div>
+      </div>
+
+      <p>${msg}</p>
+
+      <p style="
+        margin-top:15px;
+        font-size:12px;
+        color:#888;
+        background:#fff0f5;
+        padding:8px;
+        border-radius:8px;
+      ">
+        💡 Made for fun • Not a real prediction
+      </p>
+
+      <button onclick="finish()">Finish</button>
+    `);
+
+  },1200);
+}
+
+// Finish
+function finish(){
+  play();
+  step++;
+  showStep();
+}
+
+// Start app
+showStep();
+</script>
+
+</body>
+</html>
